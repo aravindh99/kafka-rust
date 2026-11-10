@@ -18,12 +18,11 @@ fn main() -> std::io::Result<()>  {
                loop {
                    let mut buffer = [0u8; 4];
                    stream.read_exact(&mut buffer)?;
-                   let request_size = u32::from_be_bytes(buffer);
+                   let request_size = i32::from_be_bytes(buffer);
                    let mut request_buffer = vec![0u8; request_size as usize];
 
                    stream.read_exact(&mut request_buffer)?;
 
-                   let message_size: i32 = 19;
                    let correlation_id = &request_buffer[4..8];
                    let req_api_key = u16::from_be_bytes([
                        request_buffer[0],
@@ -37,16 +36,25 @@ fn main() -> std::io::Result<()>  {
                        0..=4 => 0,
                        _ => 35,
                    };
-                   stream.write_all(&message_size.to_be_bytes())?;
-                   stream.write_all(&correlation_id)?;
-                   stream.write_all(&error_code.to_be_bytes())?;
-                   stream.write_all(&[02])?;
-                   stream.write_all(&req_api_key.to_be_bytes())?;
-                   stream.write_all(&[00, 00])?;
-                   stream.write_all(&[00, 04])?;
-                   stream.write_all(&[00])?;
-                   stream.write_all(&[00, 00, 00, 00])?;
-                   stream.write_all(&[00])?;
+                   let mut response = Vec::new();
+                   response.extend_from_slice(&[0, 0, 0, 0]);
+
+                   response.extend_from_slice(correlation_id);
+                   response.extend_from_slice(&error_code.to_be_bytes());
+                   response.extend_from_slice(&[02]);
+                   response.extend_from_slice(&req_api_key.to_be_bytes());
+                   response.extend_from_slice(&[00, 00]);
+                   response.extend_from_slice(&[00, 04]);
+                   response.extend_from_slice(&[00]);
+                   response.extend_from_slice(&[00, 00, 00, 00]);
+                   response.extend_from_slice(&[00]);
+
+
+                   let message_size = (response.len() - 4) as i32;
+                   response[0..4].copy_from_slice(&message_size.to_be_bytes());
+
+
+                   stream.write_all(&response)?;
                }
            }
                Err(e) => {
