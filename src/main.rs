@@ -24,14 +24,14 @@ fn main() -> std::io::Result<()>  {
                    stream.read_exact(&mut request_buffer)?;
 
                    let message_size: i32 = 19;
-                   let correlation_id = &buffer[8..12];
+                   let correlation_id = &request_buffer[4..8];
                    let req_api_key = u16::from_be_bytes([
-                       request_buffer[4],
-                       request_buffer[5],
+                       request_buffer[0],
+                       request_buffer[1],
                    ]);
                    let req_api_version = u16::from_be_bytes([
-                       request_buffer[6],
-                       request_buffer[7],
+                       request_buffer[2],
+                       request_buffer[3],
                    ]);
                    let error_code: i16 = match req_api_version {
                        0..=4 => 0,
