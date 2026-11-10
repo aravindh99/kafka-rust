@@ -16,12 +16,8 @@ fn main() -> std::io::Result<()>  {
            Ok(mut stream) => {
                 println!("accepted new connection");
                let mut buffer =[0u8; 1024];
-               stream.read(&mut buffer)?;let message_size = u32::from_be_bytes([
-                   buffer[0],
-                   buffer[1],
-                   buffer[2],
-                   buffer[3],
-               ]);
+               stream.read(&mut buffer)?;
+               let message_size: i32 = 19;
                let correlation_id = &buffer[8..12];
                let req_api_key = u16::from_be_bytes([
                    buffer[4],
