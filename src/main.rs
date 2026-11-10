@@ -14,37 +14,44 @@ fn main() -> std::io::Result<()>  {
      for stream in listener.incoming() {
        match stream {
            Ok(mut stream) => {
-                println!("accepted new connection");
-               let mut buffer =[0u8; 1024];
-               stream.read(&mut buffer)?;
-               let message_size: i32 = 19;
-               let correlation_id = &buffer[8..12];
-               let req_api_key = u16::from_be_bytes([
-                   buffer[4],
-                   buffer[5],
-               ]);
-               let req_api_version = u16::from_be_bytes([
-                   buffer[6],
-                   buffer[7],
-               ]);
-               let mut error_code: i16 = match req_api_version {
-                   0..=4 => 0,
-                   _=> 35,
-               };
-               stream.write_all(&message_size.to_be_bytes())?;
-               stream.write_all(&correlation_id)?;
-               stream.write_all(&error_code.to_be_bytes())?;
-               stream.write_all(&[02])?;
-               stream.write_all(&req_api_key.to_be_bytes())?;
-               stream.write_all(&[00,00])?;
-               stream.write_all(&[00, 04])?;
-               stream.write_all(&[00])?;
-               stream.write_all(&[00 ,00, 00, 00])?;
-               stream.write_all(&[00])?;
+               println!("accepted new connection");
+               loop {
+                   let mut buffer = [0u8; 4];
+                   stream.read_exact(&mut buffer)?;
+                   let request_size = u32::from_be_bytes(buffer);
+                   let mut request_buffer = vec![0u8; request_size as usize];
+
+                   stream.read_exact(&mut request_buffer)?;
+
+                   let message_size: i32 = 19;
+                   let correlation_id = &buffer[8..12];
+                   let req_api_key = u16::from_be_bytes([
+                       request_buffer[4],
+                       request_buffer[5],
+                   ]);
+                   let req_api_version = u16::from_be_bytes([
+                       request_buffer[6],
+                       request_buffer[7],
+                   ]);
+                   let error_code: i16 = match req_api_version {
+                       0..=4 => 0,
+                       _ => 35,
+                   };
+                   stream.write_all(&message_size.to_be_bytes())?;
+                   stream.write_all(&correlation_id)?;
+                   stream.write_all(&error_code.to_be_bytes())?;
+                   stream.write_all(&[02])?;
+                   stream.write_all(&req_api_key.to_be_bytes())?;
+                   stream.write_all(&[00, 00])?;
+                   stream.write_all(&[00, 04])?;
+                   stream.write_all(&[00])?;
+                   stream.write_all(&[00, 00, 00, 00])?;
+                   stream.write_all(&[00])?;
+               }
            }
-            Err(e) => {
-                println!("error: {}", e);
-            }
+               Err(e) => {
+                   println!("error: {}", e);
+           }
 
         }
     }
