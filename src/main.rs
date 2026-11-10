@@ -19,8 +19,17 @@ fn main() -> std::io::Result<()>  {
                stream.read(&mut buffer)?;
                let message_size: u32 =0;
                let correlation_id = &buffer[8..12];
+               let req_api_version = u16::from_be_bytes([
+                   buffer[6],
+                   buffer[7],
+               ]);
+               let mut error_code: i16 = match req_api_version {
+                   0..=4 => 0,
+                   _=> 35,
+               };
                stream.write_all(&message_size.to_be_bytes())?;
                stream.write_all(&correlation_id)?;
+               stream.write_all(&error_code.to_be_bytes())?;
             }
             Err(e) => {
                 println!("error: {}", e);
