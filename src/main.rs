@@ -1,15 +1,13 @@
 #![allow(unused_imports)]
 
-use std::io::Write;
+use std::io::{Read, Write};
 use std::net::TcpListener;
 
-fn main() {
+fn main() -> std::io::Result<()>  {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
 
 
-    let message_size = "00 00 00 02".to_string();
-    let correlation_id = "00 00 00 07".to_string();
 
      let listener = TcpListener::bind("127.0.0.1:9092").unwrap();
 
@@ -17,11 +15,19 @@ fn main() {
        match stream {
            Ok(mut stream) => {
                 println!("accepted new connection");
-               let _ = stream.write_all(&[0,0,0,0,0,0,0,7]);
+               let mut buffer =[0u8; 1024];
+               stream.read(&mut buffer)?;
+               let message_size: u32 =0;
+               let correlation_id = &buffer[8..12];
+               stream.write_all(&message_size.to_be_bytes())?;
+               stream.write_all(&correlation_id)?;
             }
             Err(e) => {
                 println!("error: {}", e);
             }
+
         }
     }
+    Ok(())
+
 }
