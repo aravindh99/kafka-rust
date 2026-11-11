@@ -67,10 +67,16 @@ fn handle_client(mut stream: TcpStream) -> io::Result<()> {
         response.extend_from_slice(correlation_id);
         response.extend_from_slice(&error_code.to_be_bytes());
         response.extend_from_slice(&[02]);
-        response.extend_from_slice(&req_api_key.to_be_bytes());
+        response.extend_from_slice(&[00,12]);
         response.extend_from_slice(&[00, 00]);
         response.extend_from_slice(&[00, 04]);
         response.extend_from_slice(&[00]);
+
+        response.extend_from_slice(&75i16.to_be_bytes());
+        response.extend_from_slice(&[00]);
+        response.extend_from_slice(&[00]);
+        response.extend_from_slice(&[00]);
+
         response.extend_from_slice(&[00, 00, 00, 00]);
         response.extend_from_slice(&[00]);
 
