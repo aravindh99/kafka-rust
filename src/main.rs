@@ -73,8 +73,8 @@ fn handle_client(mut stream: TcpStream) -> io::Result<()> {
         response.extend_from_slice(&[00]);
 
         response.extend_from_slice(&75i16.to_be_bytes());
-        response.extend_from_slice(&[00]);
-        response.extend_from_slice(&[00]);
+        response.extend_from_slice(&[00, 00]);
+        response.extend_from_slice(&[00, 00]);
         response.extend_from_slice(&[00]);
 
         response.extend_from_slice(&[00, 00, 00, 00]);
