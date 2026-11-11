@@ -66,7 +66,7 @@ fn handle_client(mut stream: TcpStream) -> io::Result<()> {
 
         response.extend_from_slice(correlation_id);
         response.extend_from_slice(&error_code.to_be_bytes());
-        response.extend_from_slice(&[02]);
+        response.extend_from_slice(&[03]);
         response.extend_from_slice(&[00,12]);
         response.extend_from_slice(&[00, 00]);
         response.extend_from_slice(&[00, 04]);
