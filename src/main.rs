@@ -116,7 +116,7 @@ fn handle_client(mut stream: TcpStream) -> io::Result<()> {
             response.extend_from_slice(&3i16.to_be_bytes());
 
 
-            let topic_name = "foo";
+
             response.push((topic_name.len() + 1) as u8);
             response.extend_from_slice(topic_name.as_bytes());
 
